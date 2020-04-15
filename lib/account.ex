@@ -8,7 +8,7 @@ defmodule Account do
     account_of = get_user(accounts, account_of)
 
     cond do
-      validate_balance(account_of.balance, value) -> {:error, "Insufficient funds"}
+      validate_balance(account_of.balance, value) -> {:error, "Insufficient fundsto transfer!"}
 
       true ->
         account_to = get_user(accounts, account_to)
@@ -17,6 +17,15 @@ defmodule Account do
         account_to = %Account{account_to | balance: account_to.balance + value}
 
         [account_of, account_to]
+    end
+  end
+
+  def withdraw(account, value) do
+    cond do
+      validate_balance(account.balance, value) -> {:error, "Insufficient funds to withdraw!"}
+
+      true ->
+        %Account{account | balance: account.balance - value}
     end
   end
 
