@@ -33,17 +33,19 @@ defmodule Transaction do
 
   def by_day(day), do: Enum.filter(all(), &(&1.created_at == day))
 
-  def calculate_total_month(year, month) do
-    Enum.reduce(by_month(year, month), 0, fn x, acc -> acc + x.balance end)
+  def calculate_total_month(year, month), do: calculate(by_month(year, month))
+
+  def calculate_total_year(year), do: calculate(by_year(year))
+
+  def calculate_total_day(day), do: calculate(by_day(day))
+
+  def calculate(transactions) do
+    total_transferred = Enum.reduce(transactions, 0, fn x, acc -> acc + x.balance end)
+
+    %{total_transferred: total_transferred, transactions: Enum.count(transactions)}
   end
 
-  def calculate_total_year(year) do
-    Enum.reduce(by_year(year), 0, fn x, acc -> acc + x.balance end)
-  end
-
-  def calculate_total_day(day) do
-    Enum.reduce(by_day(day), 0, fn x, acc -> acc + x.balance end)
-  end
+  def calculate(), do: all() |> calculate()
 
   defp search() do
     {:ok, binary} = File.read(@transactions_file)
