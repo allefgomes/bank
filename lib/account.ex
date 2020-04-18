@@ -2,7 +2,7 @@ defmodule Account do
   defstruct user: User, balance: 1000
 
   @accounts_file "accounts.txt"
-  # inline method
+
   def create(user) do
     case search_by_email(user.email) do
       nil ->
@@ -33,12 +33,18 @@ defmodule Account do
       validate_balance(account_of.balance, value) -> {:error, "Insufficient fundsto transfer!"}
 
       true ->
-        account_to = search_by_email(account_to.user.email)
+        accounts = search()
+
+        accounts = List.delete accounts, account_of
+        accounts = List.delete accounts, account_to
 
         account_of = %Account{account_of | balance: account_of.balance - value}
         account_to = %Account{account_to | balance: account_to.balance + value}
 
-        [account_of, account_to]
+        accounts = accounts ++ [account_of, account_to]
+                  |> :erlang.term_to_binary
+
+        File.write(@accounts_file, accounts)
     end
   end
 
