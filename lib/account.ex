@@ -45,7 +45,8 @@ defmodule Account do
     end
   end
 
-  def withdraw(account, value) do
+  def withdraw(email, value) do
+    account = search_by_email(email)
     cond do
       validate_balance(account.balance, value) -> {:error, "Insufficient funds to withdraw!"}
 
