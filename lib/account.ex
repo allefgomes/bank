@@ -26,8 +26,9 @@ defmodule Account do
     )
   end
 
-  def transfer(account_of, account_to, value) do
-    account_of = search_by_email(account_of.user.email)
+  def transfer(email_of, email_to, value) do
+    account_of = search_by_email(email_of)
+    account_to = search_by_email(email_to)
 
     cond do
       validate_balance(account_of.balance, value) -> {:error, "Insufficient fundsto transfer!"}
