@@ -33,13 +33,9 @@ defmodule Account do
       validate_balance(account_of.balance, value) -> {:error, "Insufficient fundsto transfer!"}
 
       true ->
-        accounts = search()
-
-        accounts = List.delete accounts, account_of
-        accounts = List.delete accounts, account_to
-
+        accounts = destroy([account_of, account_to])
         account_of = %Account{account_of | balance: account_of.balance - value}
-        account_to = %Account{account_to | balance: account_to.balance + value}
+        account_to = %Account {account_to | balance: account_to.balance + value}
 
         accounts = accounts ++ [account_of, account_to]
                   |> :erlang.term_to_binary
@@ -53,8 +49,7 @@ defmodule Account do
       validate_balance(account.balance, value) -> {:error, "Insufficient funds to withdraw!"}
 
       true ->
-        accounts = search()
-        accounts = List.delete(accounts, account)
+        accounts = destroy([account])
 
         account = %Account{account | balance: account.balance - value}
         accounts = accounts ++ [account]
@@ -62,6 +57,10 @@ defmodule Account do
 
         File.write(@accounts_file, accounts)
     end
+  end
+
+  defp destroy(accounts_to_delete) do
+    Enum.reduce(accounts_to_delete, search(), fn c, account -> List.delete(account, c) end)
   end
 
   defp validate_balance(balance, value_to_transfer), do: balance < value_to_transfer
