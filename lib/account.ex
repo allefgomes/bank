@@ -53,7 +53,14 @@ defmodule Account do
       validate_balance(account.balance, value) -> {:error, "Insufficient funds to withdraw!"}
 
       true ->
-        %Account{account | balance: account.balance - value}
+        accounts = search()
+        accounts = List.delete(accounts, account)
+
+        account = %Account{account | balance: account.balance - value}
+        accounts = accounts ++ [account]
+                  |> :erlang.term_to_binary
+
+        File.write(@accounts_file, accounts)
     end
   end
 
