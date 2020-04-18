@@ -21,8 +21,7 @@ defmodule Account do
   defp search_by_email(email) do
     Enum.find(
       search(),
-      &(&1.user.email == email) # It's a anonymous function
-      # fn account -> account.user.email == email end
+      &(&1.user.email == email)
     )
   end
 
@@ -41,12 +40,15 @@ defmodule Account do
         accounts = accounts ++ [account_of, account_to]
                   |> :erlang.term_to_binary
 
+        Transaction.create("transfer", email_of, value, email_to)
+
         File.write(@accounts_file, accounts)
     end
   end
 
   def withdraw(email, value) do
     account = search_by_email(email)
+
     cond do
       validate_balance(account.balance, value) -> {:error, "Insufficient funds to withdraw!"}
 
@@ -56,6 +58,8 @@ defmodule Account do
         account = %Account{account | balance: account.balance - value}
         accounts = accounts ++ [account]
                   |> :erlang.term_to_binary
+
+        Transaction.create("withdraw", email, value)
 
         File.write(@accounts_file, accounts)
     end
