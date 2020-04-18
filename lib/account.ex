@@ -4,13 +4,13 @@ defmodule Account do
   @accounts_file "accounts.txt"
   # inline method
   def create(user) do
-    # TODO: Check validate
-    search_by_email(user.email)
-
-    binary = [%__MODULE__{user: user}] ++ search()
-    |> :erlang.term_to_binary
-
-    File.write(@accounts_file, binary)
+    case search_by_email(user.email) do
+      nil ->
+        binary = [%__MODULE__{user: user}] ++ search()
+        |> :erlang.term_to_binary
+        File.write(@accounts_file, binary)
+      _ -> {:error, "there is already a registration with the email used!"}
+    end
   end
 
   def search() do
@@ -21,7 +21,7 @@ defmodule Account do
   defp search_by_email(email) do
     Enum.find(
       search(),
-      &(&1.user.email == email) # It's a anonimous function
+      &(&1.user.email == email) # It's a anonymous function
       # fn account -> account.user.email == email end
     )
   end
