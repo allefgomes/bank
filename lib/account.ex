@@ -6,10 +6,14 @@ defmodule Account do
   def create(user) do
     case search_by_email(user.email) do
       nil ->
-        binary = [%__MODULE__{user: user}] ++ search()
-        |> :erlang.term_to_binary
+        binary =
+          ([%__MODULE__{user: user}] ++ search())
+          |> :erlang.term_to_binary()
+
         File.write(@accounts_file, binary)
-      _ -> {:error, "there is already a registration with the email used!"}
+
+      _ ->
+        {:error, "there is already a registration with the email used!"}
     end
   end
 
@@ -30,15 +34,17 @@ defmodule Account do
     account_to = search_by_email(email_to)
 
     cond do
-      validate_balance(account_of.balance, value) -> {:error, "Insufficient fundsto transfer!"}
+      validate_balance(account_of.balance, value) ->
+        {:error, "Insufficient fundsto transfer!"}
 
       true ->
         accounts = destroy([account_of, account_to])
         account_of = %Account{account_of | balance: account_of.balance - value}
-        account_to = %Account {account_to | balance: account_to.balance + value}
+        account_to = %Account{account_to | balance: account_to.balance + value}
 
-        accounts = accounts ++ [account_of, account_to]
-                  |> :erlang.term_to_binary
+        accounts =
+          (accounts ++ [account_of, account_to])
+          |> :erlang.term_to_binary()
 
         Transaction.create("transfer", email_of, value, email_to)
 
@@ -50,14 +56,17 @@ defmodule Account do
     account = search_by_email(email)
 
     cond do
-      validate_balance(account.balance, value) -> {:error, "Insufficient funds to withdraw!"}
+      validate_balance(account.balance, value) ->
+        {:error, "Insufficient funds to withdraw!"}
 
       true ->
         accounts = destroy([account])
 
         account = %Account{account | balance: account.balance - value}
-        accounts = accounts ++ [account]
-                  |> :erlang.term_to_binary
+
+        accounts =
+          (accounts ++ [account])
+          |> :erlang.term_to_binary()
 
         Transaction.create("withdraw", email, value)
 
